@@ -18,11 +18,11 @@ import (
 	"github.com/golang-migrate/migrate/v4/source"
 )
 
-// DefaultPrefetchMigrations sets the number of migrations to pre-read
+// DefaultPrefetchMigrations sets the number of migrations to pre-Read
 // from the source. This is helpful if the source is remote, but has little
 // effect for a local source (i.e. file system).
 // Please note that this setting has a major impact on the memory usage,
-// since each pre-read migration is buffered in memory. See DefaultBufferSize.
+// since each pre-Read migration is buffered in memory. See DefaultBufferSize.
 var DefaultPrefetchMigrations = uint(10)
 
 // DefaultLockTimeout sets the max time a database driver has to acquire a lock.
@@ -226,7 +226,7 @@ func (m *Migrate) Migrate(version uint) error {
 	}
 
 	ret := make(chan interface{}, m.PrefetchMigrations)
-	go m.read(curVersion, int(version), ret)
+	go m.Read(curVersion, int(version), ret)
 
 	return m.unlockErr(m.runMigrations(ret))
 }
@@ -361,6 +361,11 @@ func (m *Migrate) Run(migration ...*Migration) error {
 	return m.unlockErr(m.runMigrations(ret))
 }
 
+func (m *Migrate) CurrentVersion() int {
+	version, _, _ := m.databaseDrv.Version()
+	return version
+}
+
 // Force sets a migration version.
 // It does not check any currently active version in database.
 // It resets the dirty state to false.
@@ -395,11 +400,11 @@ func (m *Migrate) Version() (version uint, dirty bool, err error) {
 	return suint(v), d, nil
 }
 
-// read reads either up or down migrations from source `from` to `to`.
+// Read reads either up or down migrations from source `from` to `to`.
 // Each migration is then written to the ret channel.
 // If an error occurs during reading, that error is written to the ret channel, too.
-// Once read is done reading it will close the ret channel.
-func (m *Migrate) read(from int, to int, ret chan<- interface{}) {
+// Once Read is done reading it will close the ret channel.
+func (m *Migrate) Read(from int, to int, ret chan<- interface{}) {
 	defer close(ret)
 
 	// check if from version exists
@@ -760,7 +765,7 @@ func (m *Migrate) runMigrations(ret <-chan interface{}) error {
 			// log either verbose or normal
 			if m.Log != nil {
 				if m.Log.Verbose() {
-					m.logPrintf("Finished %v (read %v, ran %v)\n", migr.LogString(), readTime, runTime)
+					m.logPrintf("Finished %v (Read %v, ran %v)\n", migr.LogString(), readTime, runTime)
 				} else {
 					m.logPrintf("%v (%v)\n", migr.LogString(), readTime+runTime)
 				}

@@ -1140,7 +1140,7 @@ func TestRead(t *testing.T) {
 
 	for i, v := range tt {
 		ret := make(chan interface{})
-		go m.read(v.from, v.to, ret)
+		go m.Read(v.from, v.to, ret)
 		migrations, err := migrationsFromChannel(ret)
 
 		if (v.expectErr == os.ErrNotExist && !errors.Is(err, os.ErrNotExist)) ||

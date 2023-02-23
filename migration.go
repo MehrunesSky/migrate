@@ -8,7 +8,7 @@ import (
 )
 
 // DefaultBufferSize sets the in memory buffer size (in Bytes) for every
-// pre-read migration (see DefaultPrefetchMigrations).
+// pre-Read migration (see DefaultPrefetchMigrations).
 var DefaultBufferSize = uint(100000)
 
 // Migration holds information about a migration.
@@ -49,10 +49,10 @@ type Migration struct {
 	// FinishedBuffering is the time when buffering of the migration source finished.
 	FinishedBuffering time.Time
 
-	// FinishedReading is the time when the migration source is fully read.
+	// FinishedReading is the time when the migration source is fully Read.
 	FinishedReading time.Time
 
-	// BytesRead holds the number of Bytes read from the migration source.
+	// BytesRead holds the number of Bytes Read from the migration source.
 	BytesRead int64
 }
 
@@ -127,7 +127,7 @@ func (m *Migration) Buffer() error {
 
 	b := bufio.NewReaderSize(m.Body, int(m.BufferSize))
 
-	// start reading from body, peek won't move the read pointer though
+	// start reading from body, peek won't move the Read pointer though
 	// poor man's solution?
 	if _, err := b.Peek(int(m.BufferSize)); err != nil && err != io.EOF {
 		return err
